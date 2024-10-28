@@ -1,39 +1,39 @@
--- Отримания Приписала к категориулу Филмиевого
-ВЫБРАТЬ ф.title, ф.length, к.name КАК категория
-ИЗ филлим ф
-PRIСОEDYNЯDYTHESI film_category fc NА f.film_id = fc.film_id
-PRIСОEDYNЯETEСIL categiya c NA fc.category_id = c.category_id;
+-- Отримання списку фільмів та їх категорій
+SELECT f.title, f.length, c.name AS category
+FROM film f
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id;
 
---Фильми, орендовані певним клієнтом
-ВЫБРАТЬ ф.title, р.rental_period
-ИЗ заказчик в
-PRIСОEDYNЯTESI arénda рНА c.customer_id = р.customer_id
-PRIСОEDINIATEСI invetary i NA r.inventory_id = i.inventory_id
-ПРИСОЭДИЦИАЯ филиал ф А i.film_id = ф.film_id
-GDE c.first_name = 'САРА' И c.last_name = 'LIJIZYС';
+-- Фільми, орендовані певним клієнтом
+SELECT f.title, r.rental_period
+FROM customer c
+JOIN rental r ON c.customer_id = r.customer_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+WHERE c.first_name = 'SARAH' AND c.last_name = 'LEWIS';
 
--- Популярный Филмитов
-ВЫБРАТЬ ф.название, ГРАФ(*) КАК Аренда_счет
-ИЗ Аренда р
-PRIСОEDINIATEСI invetary i NA r.inventory_id = i.inventory_id
-ПРИСОЭДИЦИАЯ филиал ф А i.film_id = ф.film_id
-ГРУППА ПО ф.название
-ОРДЕН ПО аренда_счет ДЕСК
-ПРЁДЕЛЬЕ 5;
+-- Популярність фільмів
+SELECT f.title, COUNT(*) AS rental_count
+FROM rental r
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+GROUP BY f.title
+ORDER BY rental_count DESC
+LIMIT 5;
 
--- ДАДАВАННЯ НОВОГО КЛІЄНТА
--- Перевірка існуваня міста
-ВЫБРАТЬ год_ыд ИЗ год ГДЕ год = "Сан-Франциско";
+-- ДОДАВАННЯ НОВОГО КЛІЄНТА
+-- Перевірка існування міста
+SELECT city_id FROM city WHERE city = 'San Francisco';
 -- Додавання нового адреса
-ВСТАВИТЬ В адрес (адрес, район, city_id, postal_code, teléfohn)
-ЦЕННОКТИ ('123 Главная Улица', 'Район', (ВЫБРАТЬ год_ыд ИЗ год ГДЕ год = "Сан-Франциско"), '94101', '777-888-7890');
+INSERT INTO address (address, district, city_id, postal_code, phone)
+VALUES ('123 Main St', 'District', (SELECT city_id FROM city WHERE city = 'San Francisco'), '94101', '777-888-7890');
 -- Додавання нового клієнта
-СТАВИТЬ В заказчик (first_name, last_name, address_id, store_id, email, activebool, create_date)
-ЦЕННОКТИ ('Алиса', 'Купер', 1, 1, "alissа.cuper@example.com", ПРАВДА, ТЕКЮ В ЕЩЕ ОДНОЙ СТРАННОЙ ВЕЩЬЮ С ЮРЬЕ_ДАТА);
+INSERT INTO customer (first_name, last_name, address_id, store_id, email, activebool, create_date)
+VALUES ('Alice', 'Cooper', 1, 1, 'alice.cooper@example.com', TRUE, CURRENT_DATE);
 -- ОНОВЛЕННЯ АДРЕСИ КЛІЄНТА
-ОБНОВЛЕНЕЦ заказик
-НАБОР адрес_id = (ВЫБРАТЬ adrés_yd ЯВЛЯЕТСЯ adrés GDE adrés = '456 Вячеслав Улица')
-GDE first_name = 'Алиса' И фамилия = 'Купер';
+UPDATE customer
+SET address_id = (SELECT address_id FROM address WHERE address = '456 Elm St')
+WHERE first_name = 'Alice' AND last_name = 'Cooper';
 -- ВИДАЛЕННЯ КЛІЄНТА
-УДАЛИТ ИЗ заказчик
-GDE first_name = 'Алиса' И фамилия = 'Купер';
+DELETE FROM customer
+WHERE first_name = 'Alice' AND last_name = 'Cooper';
